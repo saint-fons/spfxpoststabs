@@ -4,7 +4,8 @@ import { useState } from "react";
 import { WidgetSize, Dashboard } from "@pnp/spfx-controls-react/lib/Dashboard";
 import { useId, useBoolean } from "@fluentui/react-hooks";
 import axios from "axios";
-import { Icon, Text } from "office-ui-fabric-react";
+import { Icon, Text, DetailsList } from "office-ui-fabric-react";
+import columns from "../../styles/columns"
 
 const Posts = () => {
   /* Посты */
@@ -99,22 +100,6 @@ const Posts = () => {
     setToggleState(index);
   };
 
-  /* Считаем посты в которых айдишки делятся на 3 и на 7 */
-
-  /* useEffect((posts) => {
-
-    async function fetchPostsNumber(posts) {
-      try {
-        let idDividedBy3 = posts.length
-        console.log(idDividedBy3)
-      } catch (e) {
-        let idDividedBy3 = 0
-      }
-    }
-  }, [posts]);
-  
-  */
-
   const DATA = [
     { x0: 0, x: 1, y: dividedBy3 },
     { x0: 1, x: 2, y: dividedBy7 },
@@ -136,19 +121,30 @@ const Posts = () => {
       <Dashboard
         widgets={[
           {
-            title: "Card 1",
-            desc: "Last updated Monday, April 4 at 11:15 AM (PT)",
+            title: "SPFx",
             widgetActionGroup: calloutItemsExample,
             size: WidgetSize.Triple,
             body: [
               {
                 id: "t1",
-                title: "Tab 1",
-                content: <Text>Content #1</Text>,
+                title: "Посты",
+                content: (
+                  <Text>
+                    <DetailsList
+                      items={displayPosts}
+                      columns={columns}
+                      selectionPreservedOnEmptyClick={true}
+                      ariaLabelForSelectionColumn="Toggle selection"
+                      ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+                      checkButtonAriaLabel="select row"
+                      onItemInvoked={PickedUser}
+                    />
+                  </Text>
+                ),
               },
               {
                 id: "t2",
-                title: "Tab 2",
+                title: "Графики",
                 content: <Text>Content #2</Text>,
               },
               {
@@ -157,16 +153,6 @@ const Posts = () => {
                 content: <Text>Content #3</Text>,
               },
             ],
-            link: linkExample,
-          },
-          {
-            title: "Card 2",
-            size: WidgetSize.Single,
-            link: linkExample,
-          },
-          {
-            title: "Card 3",
-            size: WidgetSize.Double,
             link: linkExample,
           },
         ]}
