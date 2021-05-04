@@ -4,8 +4,15 @@ import { useState } from "react";
 import { WidgetSize, Dashboard } from "@pnp/spfx-controls-react/lib/Dashboard";
 import { useId, useBoolean } from "@fluentui/react-hooks";
 import axios from "axios";
-import { Icon, Text, DetailsList } from "office-ui-fabric-react";
-import columns from "../../styles/columns"
+import { Icon, Text, DetailsList, ProgressIndicator } from "office-ui-fabric-react";
+import columns from "../../styles/columns";
+import {
+  ChartControl,
+  ChartType,
+} from "@pnp/spfx-controls-react/lib/ChartControl";
+import ReactPaginate from "react-paginate";
+import style from "../HelloWorld.module.scss"
+import FetchUsersForm from "../Forms/FetchUsersForm";
 
 const Posts = () => {
   /* Посты */
@@ -100,12 +107,6 @@ const Posts = () => {
     setToggleState(index);
   };
 
-  const DATA = [
-    { x0: 0, x: 1, y: dividedBy3 },
-    { x0: 1, x: 2, y: dividedBy7 },
-    { x0: 2, x: 3, y: allNumbers },
-  ];
-
   const linkExample = { href: "#" };
   const calloutItemsExample = [
     {
@@ -118,45 +119,91 @@ const Posts = () => {
 
   return (
     <div>
-      <Dashboard
-        widgets={[
-          {
-            title: "SPFx",
-            widgetActionGroup: calloutItemsExample,
-            size: WidgetSize.Triple,
-            body: [
+        {
+           posts.length === 0 ? (
+            <ProgressIndicator label="Loading" />
+           ) :
+           (
+            <Dashboard
+            widgets={[
               {
-                id: "t1",
-                title: "Посты",
-                content: (
-                  <Text>
-                    <DetailsList
-                      items={displayPosts}
-                      columns={columns}
-                      selectionPreservedOnEmptyClick={true}
-                      ariaLabelForSelectionColumn="Toggle selection"
-                      ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-                      checkButtonAriaLabel="select row"
-                      onItemInvoked={PickedUser}
-                    />
-                  </Text>
-                ),
+                title: "SPFx",
+                widgetActionGroup: calloutItemsExample,
+                size: WidgetSize.Box,
+                body: [
+                  {
+                    id: "t1",
+                    title: "Посты",
+                    content: (
+                      <Text>
+                          <div>
+                              <FetchUsersForm />
+                          </div>
+                        <DetailsList
+                          items={displayPosts}
+                          columns={columns}
+                          selectionPreservedOnEmptyClick={true}
+                          ariaLabelForSelectionColumn="Toggle selection"
+                          ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+                          checkButtonAriaLabel="select row"
+                          onItemInvoked={PickedUser}
+                        />
+                        <div>
+                          <ReactPaginate
+                            previousLabel={"Previous"}
+                            netLabel={"Next"}
+                            pageCount={pageCount}
+                            onPageChange={changePage}
+                            containerClassName={style.paginationBttns}
+                            previousLinkClassName={"previousBttn"}
+                            nextLinkClassname={"nextBttn"}
+                            disableClassname={"paginationDisabled"}
+                            activeClassName={"paginationActive"}
+                          />
+                        </div>
+                      </Text>
+                    ),
+                  },
+                  {
+                    id: "t2",
+                    title: "Диаграмма",
+                    content: (
+                      <Text>
+                        <ChartControl
+                          type={ChartType.Bar}
+                          data={{
+                            labels: [
+                              "January",
+                              "February",
+                              "March",
+                              "April",
+                              "May",
+                              "June",
+                              "July",
+                            ],
+                            datasets: [
+                              {
+                                label: "My First dataset",
+                                data: [65, 59, 80, 81, 56, 55, 40],
+                              },
+                            ],
+                          }}
+                        />
+                      </Text>
+                    ),
+                  },
+                  {
+                    id: "t3",
+                    title: "Tab 3",
+                    content: <Text>Content #3</Text>,
+                  },
+                ],
+                link: linkExample,
               },
-              {
-                id: "t2",
-                title: "Графики",
-                content: <Text>Content #2</Text>,
-              },
-              {
-                id: "t3",
-                title: "Tab 3",
-                content: <Text>Content #3</Text>,
-              },
-            ],
-            link: linkExample,
-          },
-        ]}
-      />
+            ]}
+          />
+           ) }
+      
     </div>
   );
 };
