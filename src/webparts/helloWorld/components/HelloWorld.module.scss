@@ -2,9 +2,39 @@
 
 .container {
   width: 700px;
-  height: 1500px;
-  background-color: aquamarine;
+  height: 800px;
 }
+
+/* Формы */
+
+.container__modal {
+  width: 500px;
+  height: 500px;
+}
+
+.container {
+  min-width: 150px;
+  max-height: 150px;
+
+  margin-top: 0;
+
+  margin-bottom: 15px;
+}
+
+.container__form {
+  min-width: 150px;
+  max-height: 150px;
+
+  margin-top: 0;
+
+  margin-bottom: 15px;
+}
+
+.container__users {
+  line-height: 1.7em;
+}
+
+/* Формы */
 
 /* Пагинация */
 .paginationBttns {

@@ -4,15 +4,34 @@ import { useState } from "react";
 import { WidgetSize, Dashboard } from "@pnp/spfx-controls-react/lib/Dashboard";
 import { useId, useBoolean } from "@fluentui/react-hooks";
 import axios from "axios";
-import { Icon, Text, DetailsList, ProgressIndicator } from "office-ui-fabric-react";
+import {
+  Icon,
+  Text,
+  DetailsList,
+  ProgressIndicator,
+  DefaultButton,
+  Dialog,
+} from "office-ui-fabric-react";
 import columns from "../../styles/columns";
 import {
   ChartControl,
   ChartType,
 } from "@pnp/spfx-controls-react/lib/ChartControl";
 import ReactPaginate from "react-paginate";
-import style from "../HelloWorld.module.scss"
+import style from "../HelloWorld.module.scss";
 import FetchUsersForm from "../Forms/FetchUsersForm";
+import {
+  XYPlot,
+  XAxis,
+  YAxis,
+  VerticalRectSeries,
+  Highlight,
+  ShowcaseButton,
+  VerticalGridLines,
+  HorizontalGridLines,
+  BarSeries,
+  LabelSeries,
+} from "react-vis";
 
 const Posts = () => {
   /* Посты */
@@ -34,16 +53,19 @@ const Posts = () => {
   }
   /* Посты */
 
-  const [dividedBy3, setdividedBy3] = useState<any>(0);
-  const [dividedBy7, setdividedBy7] = useState<any>(0);
-  const [allNumbers, setallNumbers] = useState<any>(0);
+  const [dividedBy3State, setdividedBy3] = useState<any>(15);
+  const [dividedBy7State, setdividedBy7] = useState<any>(20);
+  const [allNumbersState, setallNumbers] = useState<any>(25);
+  const [diagramItemsSum, setdiagramItems] = useState<any>(0);
+
+  let diagramItems = [];
 
   useEffect(() => {
     let dividedBy3 = 0;
     let dividedBy7 = 0;
     let allNumbers = 0;
 
-    for (let i = 0; i <= posts.length; i++) {
+    for (let i = 1; i <= posts.length; i++) {
       if (i % 3 === 0) {
         dividedBy3 = dividedBy3 + 1;
       }
@@ -59,6 +81,12 @@ const Posts = () => {
     setdividedBy3(dividedBy3);
     setdividedBy7(dividedBy7);
     setallNumbers(allNumbers);
+
+    diagramItems.push(dividedBy3, dividedBy7, allNumbers);
+
+    setdiagramItems(diagramItems);
+
+    console.log(typeof dividedBy3State);
   }, [posts]);
 
   /* Пагинация */
@@ -117,93 +145,112 @@ const Posts = () => {
     { id: "action_2", title: "Popup", icon: <Icon iconName={"Add"} /> },
   ];
 
+
+  function _LoadAsyncData(): Promise<any> {
+      return new Promise<any>((reolve, reject ) => {
+          const data =
+          {
+            labels: ['3', '7', 'ALL'],
+            datasets: [
+              {
+                label: 'SPFx',
+                data: [dividedBy3State, dividedBy7State, allNumbersState]
+              }
+            ]
+          };
+          reolve(data)
+      })
+  }
+
   return (
     <div>
-        {
-           posts.length === 0 ? (
-            <ProgressIndicator label="Loading" />
-           ) :
-           (
-            <Dashboard
-            widgets={[
-              {
-                title: "SPFx",
-                widgetActionGroup: calloutItemsExample,
-                size: WidgetSize.Box,
-                body: [
-                  {
-                    id: "t1",
-                    title: "Посты",
-                    content: (
-                      <Text>
-                          <div>
-                              <FetchUsersForm />
-                          </div>
-                        <DetailsList
-                          items={displayPosts}
-                          columns={columns}
-                          selectionPreservedOnEmptyClick={true}
-                          ariaLabelForSelectionColumn="Toggle selection"
-                          ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-                          checkButtonAriaLabel="select row"
-                          onItemInvoked={PickedUser}
-                        />
+      {posts.length === 0 ? (
+        <ProgressIndicator label="Loading" />
+      ) : (
+        <Dashboard
+          widgets={[
+            {
+              title: "SPFx",
+              widgetActionGroup: calloutItemsExample,
+              size: WidgetSize.Box,
+              body: [
+                {
+                  id: "t1",
+                  title: "Посты",
+                  content: (
+                    <Text>
+                      <div>
                         <div>
-                          <ReactPaginate
-                            previousLabel={"Previous"}
-                            netLabel={"Next"}
-                            pageCount={pageCount}
-                            onPageChange={changePage}
-                            containerClassName={style.paginationBttns}
-                            previousLinkClassName={"previousBttn"}
-                            nextLinkClassname={"nextBttn"}
-                            disableClassname={"paginationDisabled"}
-                            activeClassName={"paginationActive"}
+                          <DefaultButton
+                            secondaryText="Открыть профиль"
+                            onClick={toggleHideDialog}
+                            text="Открыть профиль"
                           />
                         </div>
-                      </Text>
-                    ),
-                  },
-                  {
-                    id: "t2",
-                    title: "Диаграмма",
-                    content: (
-                      <Text>
-                        <ChartControl
-                          type={ChartType.Bar}
-                          data={{
-                            labels: [
-                              "January",
-                              "February",
-                              "March",
-                              "April",
-                              "May",
-                              "June",
-                              "July",
-                            ],
-                            datasets: [
-                              {
-                                label: "My First dataset",
-                                data: [65, 59, 80, 81, 56, 55, 40],
-                              },
-                            ],
-                          }}
+                        <>
+                          <Dialog
+                            hidden={hideDialog}
+                            onDismiss={toggleHideDialog}
+                            modalProps={modalProps}
+                          >
+                            {pickedUser.length === 0 ? (
+                              <div>Пожалуйста, выберите сообщение</div>
+                            ) : (
+                              <FetchUsersForm pickedUser={pickedUser} />
+                            )}
+                          </Dialog>
+                        </>
+                      </div>
+                      <DetailsList
+                        items={displayPosts}
+                        columns={columns}
+                        selectionPreservedOnEmptyClick={true}
+                        ariaLabelForSelectionColumn="Toggle selection"
+                        ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+                        checkButtonAriaLabel="select row"
+                        onItemInvoked={PickedUser}
+                      />
+                      <div>
+                        <ReactPaginate
+                          previousLabel={"Previous"}
+                          netLabel={"Next"}
+                          pageCount={pageCount}
+                          onPageChange={changePage}
+                          containerClassName={style.paginationBttns}
+                          previousLinkClassName={"previousBttn"}
+                          nextLinkClassname={"nextBttn"}
+                          disableClassname={"paginationDisabled"}
+                          activeClassName={"paginationActive"}
                         />
-                      </Text>
-                    ),
-                  },
-                  {
-                    id: "t3",
-                    title: "Tab 3",
-                    content: <Text>Content #3</Text>,
-                  },
-                ],
-                link: linkExample,
-              },
-            ]}
-          />
-           ) }
-      
+                      </div>
+                    </Text>
+                  ),
+                },
+                {
+                  id: "t2",
+                  title: "Диаграмма",
+                  content: (
+                    <Text>
+                      <ChartControl
+                      type='bar'
+                      datapromise={_LoadAsyncData()}
+                      />
+                    </Text>
+                  ),
+                },
+                {
+                  id: "t3",
+                  title: "Tab 3",
+                  content: (
+                    <Text>
+                    </Text>
+                  ),
+                },
+              ],
+            },
+          ]}
+        />
+      )}
     </div>
   );
 };
